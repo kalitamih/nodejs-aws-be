@@ -44,10 +44,10 @@ const serverlessConfiguration: Serverless = {
           contentType: "application/json",
           schema: {
             type: "object",
-            properties: {
-                message: {
-                  type: "string"
-                }
+            properties: { 
+              message: {
+                type: "string"
+              }
             },
         }                       
         },
@@ -170,18 +170,6 @@ const serverlessConfiguration: Serverless = {
                   }
                 },
                 {
-                  statusCode: 400,
-                  responseModels: {
-                    "application/json": "ErrorResponse"
-                  }
-                },
-                {
-                  statusCode: 404,
-                  responseModels: {
-                    "application/json": "ErrorResponse"
-                  }
-                },
-                {
                   statusCode: 500,
                   responseModels: {
                     "application/json": "ErrorResponse"
@@ -203,12 +191,12 @@ const serverlessConfiguration: Serverless = {
             cors: true,
             request: {
               parameters: {
-                paths: {                        
-                  required: true
+                paths: {                      
+                  productId: true,         
                 }                
               }          
             },             
-              // @ts-ignore
+            // @ts-ignore
             documentation: {
                 tags: [
                   "Product"
@@ -276,9 +264,9 @@ const serverlessConfiguration: Serverless = {
                 ],              
                 methodResponses: [
                   {
-                    statusCode: 200,
+                    statusCode: 204,
                     responseModels: {
-                      "application/json": "ProductResponse"
+                      "application/json": "NoContentResponse"
                     }
                   },
                   {
