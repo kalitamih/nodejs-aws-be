@@ -3,9 +3,6 @@ import type { Serverless } from 'serverless/aws';
 const serverlessConfiguration: Serverless = {
   service: {
     name: 'product-service',
-    // app and org for use with dashboard.serverless.com
-    // app: your-app-name,
-    // org: your-org-name,
   },
   frameworkVersion: '2',
   custom: {
@@ -40,26 +37,20 @@ const serverlessConfiguration: Serverless = {
           description: "Information about a certain item"
         }
       ],
-      resources: [
-        {
-          path: "products/",
-          description: "This is the list of all products"
-        },
-        {
-          path: "products/{productId}",
-          description: "This is information about a certain item",
-          pathParams: [{
-            name: "productId",
-            description: "Id for product item",
-            required: true,
-            schema: {
-              type: "string",
-              pattern: "^[1-9][0-9]*$" 
-            }                    
-          }],
-        }
-      ],
       models: [
+        {     
+          name: "NoContentResponse",
+          description: "No content!",
+          contentType: "application/json",
+          schema: {
+            type: "object",
+            properties: {
+                message: {
+                  type: "string"
+                }
+            },
+        }                       
+        },
         {     
             name: "ErrorResponse",
             description: "This is an error",
@@ -67,7 +58,7 @@ const serverlessConfiguration: Serverless = {
             schema: {
                 type: "object",
                 properties: {
-                    error: {
+                    message: {
                       type: "string"
                     }
                 },
@@ -87,10 +78,11 @@ const serverlessConfiguration: Serverless = {
                       type: "string"
                     },
                     id: {
-                      type: "string"
+                      type: "string",
+                      format: "uuid"
                     },
                     price: {
-                      type: "integer"
+                      type: "number"
                     },
                     title: {
                       type: "string"
@@ -102,38 +94,37 @@ const serverlessConfiguration: Serverless = {
               },    
         },
         {     
-          name: "ProductsResponse",
-          description: "This is product",
-          contentType: "application/json",
-          schema: {
-              type: "array",           
-              items: {
-                type: "object",
-                properties: {                 
-                  count: {
-                    type: "integer"
-                  },
-                  description:{
-                    type: "string"
-                  },
-                  id: {
-                    type: "string"
-                  },
-                  price: {
-                    type: "integer"
-                  },
-                  title: {
-                    type: "string"
-                  },
-                  image: {
-                    type: "string"
-                  },                 
-              },
-              }
-    
-          },    
-      },
-        
+            name: "ProductsResponse",
+            description: "This is product",
+            contentType: "application/json",
+            schema: {
+                type: "array",           
+                items: {
+                    type: "object",
+                    properties: {                 
+                        count: {
+                          type: "integer"
+                        },
+                        description:{
+                            type: "string"
+                        },
+                        id: {
+                            type: "string",
+                             format: "uuid"
+                        },
+                        price: {
+                            type: "number"
+                        },
+                        title: {
+                            type: "string"
+                        },
+                        image: {
+                            type: "string"
+                        },                 
+                    },
+                  },    
+              },    
+          },        
 
       ],
       
@@ -144,11 +135,17 @@ const serverlessConfiguration: Serverless = {
   provider: {
     name: 'aws',
     runtime: 'nodejs12.x',
+    stage: '${opt:stage, \'dev\'}',
     apiGateway: {
       minimumCompressionSize: 1024,
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      DB_USER: '${opt:DB_USER}',
+      DB_PASSWORD:'${opt:DB_PASSWORD}',
+      DB_HOST: '${opt:DB_HOST}',
+      DB_PORT: '${opt:DB_PORT}',
+      DB_NAME: '${opt:DB_NAME}',
     },
   },
   functions: {
@@ -173,7 +170,7 @@ const serverlessConfiguration: Serverless = {
                   }
                 },
                 {
-                  statusCode: 422,
+                  statusCode: 400,
                   responseModels: {
                     "application/json": "ErrorResponse"
                   }
@@ -206,8 +203,8 @@ const serverlessConfiguration: Serverless = {
             cors: true,
             request: {
               parameters: {
-                paths: {
-                  productId: true
+                paths: {                        
+                  required: true
                 }                
               }          
             },             
@@ -224,7 +221,7 @@ const serverlessConfiguration: Serverless = {
                     }
                   },
                   {
-                    statusCode: 422,
+                    statusCode: 400,
                     responseModels: {
                       "application/json": "ErrorResponse"
                     }
@@ -247,7 +244,91 @@ const serverlessConfiguration: Serverless = {
         }
       ]
     },
-  }
+    createProduct: {
+      handler: 'src/handlers/createProduct.handle',
+      events: [
+        {
+          http: {
+            method: 'post',
+            path: 'products',
+            cors: {
+              // @ts-ignore
+              origin: "*", 
+              headers: [
+                "Content-Type",
+                "X-Amz-Date",
+                "Authorization",
+                "X-Api-Key",
+                "X-Amz-Security-Token",
+                "X-Amz-User-Agent",
+                "Cache-Control"
+               ]                    
+            },           
+            request: {
+              schema: {
+                "application/json":  "${file(product.json)}"
+              }              
+            },             
+              // @ts-ignore
+            documentation: {
+                tags: [
+                  "CreateProduct"
+                ],              
+                methodResponses: [
+                  {
+                    statusCode: 200,
+                    responseModels: {
+                      "application/json": "ProductResponse"
+                    }
+                  },
+                  {
+                    statusCode: 400,
+                    responseModels: {
+                      "application/json": "ErrorResponse"
+                    }
+                  },
+                  {
+                    statusCode: 500,
+                    responseModels: {
+                      "application/json": "ErrorResponse"
+                    }
+                  }
+                ]
+            }
+          }
+        }
+      ]
+    },
+  },
+  Resources: {
+    GatewayResponseDefault4XX: {
+      Type: 'AWS::ApiGateway::GatewayResponse',
+      Properties: {
+        ResponseParameters: {          
+          "gatewayresponse.header.Access-Control-Allow-Origin": "'*'", 
+          "gatewayresponse.header.Access-Control-Allow-Headers": "'*'"
+        },
+        ResponseType: "DEFAULT_4XX",
+        RestApiId: {
+          Ref: 'ApiGatewayRestApi'
+        }
+      }
+    },
+    GatewayResponseDefault5XX: {
+      Type: 'AWS::ApiGateway::GatewayResponse',
+      Properties: {
+        ResponseParameters: {          
+          "gatewayresponse.header.Access-Control-Allow-Origin": "'*'", 
+          "gatewayresponse.header.Access-Control-Allow-Headers": "'*'"
+        },
+        ResponseType: "DEFAULT_4XX",
+        RestApiId: {
+          Ref: 'ApiGatewayRestApi'
+        }
+      },
+    },
+  },
+  
 }
 
 module.exports = serverlessConfiguration;
