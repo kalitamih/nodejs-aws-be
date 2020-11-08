@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS stocks (
     id SERIAL PRIMARY KEY,
     product_id uuid,
-    FOREIGN KEY (product_id) REFERENCES products(id),
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
     count INTEGER
 );
 
