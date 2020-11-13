@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
   description: API fro shoes shop
-  version: '2020-10-31T23:40:15Z'
-  title: dev-product-service
+  version: '2020-11-08T13:07:03Z'
+  title: prod-product-service
   contact:
     name: Kalita Mikhail
     url: 'https://github.com/kalitamih'
@@ -10,8 +10,8 @@ info:
   license:
     name: Licensing
     url: 'https://github.com/kalitamih'
-host: hwpwl7ddm4.execute-api.eu-west-1.amazonaws.com
-basePath: /dev
+host: z2gow2hl38.execute-api.eu-west-1.amazonaws.com
+basePath: /prod
 schemes:
   - https
 paths:
@@ -26,17 +26,18 @@ paths:
           in: path
           required: true
           type: string
+          format: uuid
       responses:
         '200':
           description: 200 response
           schema:
             $ref: '#/definitions/ProductResponse'
-        '404':
-          description: 404 response
+        '400':
+          description: 400 response
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '422':
-          description: 422 response
+        '404':
+          description: 404 response
           schema:
             $ref: '#/definitions/ErrorResponse'
         '500':
@@ -44,15 +45,16 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
     options:
-      consumes:
-        - application/json
-      produces:
-        - application/json
       parameters:
         - name: productId
           in: path
           required: true
           type: string
+          format: uuid
+      consumes:
+        - application/json
+      produces:
+        - application/json
       responses:
         '200':
           description: 200 response
@@ -74,12 +76,30 @@ paths:
           description: 200 response
           schema:
             $ref: '#/definitions/ProductsResponse'
-        '404':
-          description: 404 response
+        '500':
+          description: 500 response
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '422':
-          description: 422 response
+    post:
+      tags:
+        - CreateProduct
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: produApiGaKS4H7RZWUK0Q
+          required: true
+          schema:
+            $ref: '#/definitions/produApiGaKS4H7RZWUK0Q'
+      responses:
+        '204':
+          description: 204 response
+          schema:
+            $ref: '#/definitions/NoContentResponse'
+        '400':
+          description: 400 response
           schema:
             $ref: '#/definitions/ErrorResponse'
         '500':
@@ -102,19 +122,26 @@ paths:
             Access-Control-Allow-Headers:
               type: string
 definitions:
+  NoContentResponse:
+    type: object
+    properties:
+      message:
+        type: string
+    description: No content!
   ProductResponse:
     type: object
     properties:
       image:
         type: string
       price:
-        type: integer
+        type: number
       count:
         type: integer
       description:
         type: string
       id:
         type: string
+        format: uuid
       title:
         type: string
     description: This is product
@@ -127,18 +154,34 @@ definitions:
         image:
           type: string
         price:
-          type: integer
+          type: number
         count:
           type: integer
         description:
           type: string
         id:
           type: string
+          format: uuid
         title:
           type: string
+  produApiGaKS4H7RZWUK0Q:
+    type: object
+    required:
+      - price
+      - title
+    properties:
+      price:
+        type: number
+      count:
+        type: integer
+      description:
+        type: string
+      title:
+        type: string
+    title: Product
   ErrorResponse:
     type: object
     properties:
-      error:
+      message:
         type: string
     description: This is an error

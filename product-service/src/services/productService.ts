@@ -4,12 +4,16 @@ import { IProductHandler, IProductService, Product } from "../utils/interfaces";
 class ProductService implements  IProductService  {
     constructor (private _productHandler: IProductHandler) {}
 
-    async getProduct(id: number): Promise<Product> {
-        return this._productHandler.getProduct(id - 1);
+    async getProduct(id: string): Promise<Product> {
+        return this._productHandler.getProduct(id);
     }
 
     async getProducts(): Promise<Product[]> {
         return this._productHandler.getListProduct();
+    }
+
+    async createProduct(product: Product): Promise<void> {
+        return this._productHandler.createProduct(product);
     }
 }
 

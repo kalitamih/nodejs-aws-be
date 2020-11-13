@@ -1,30 +1,29 @@
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import 'source-map-support/register';
 import productService from '../services/productService';
-import { Headers } from '../utils/constants';
+import { Headers, regexUUID } from '../utils/constants';
 
-export const handle = async (event: APIGatewayProxyEvent, _context: Context) => {
-    const { productId } =  event.pathParameters;
- 
+export const handle = async (event: APIGatewayProxyEvent, _context: Context) => { 
     try {
-        const id = parseInt(productId, 10);
-        if(isNaN(id)) {
+        console.log(event);
+        const { productId } =  event.pathParameters;   
+        if(!regexUUID.test(productId)) {
             return {
-                statusCode: 422,
+                statusCode: 400,
                 body: JSON.stringify({
-                    error: "ProductId id invalid!",
+                    message: "Invalid format product id!",
                 }, null, 2),
                 headers: Headers,
-            };
+            };  
         }
 
-        const product = await productService.getProduct(id);
+        const product = await productService.getProduct(productId);
 
         if(!product) {
             return {
                 statusCode: 404,
                 body: JSON.stringify({
-                    error: "Product not found!",
+                    message: "Product not found!",
                 }, null, 2),
                 headers: Headers,
             };
@@ -36,11 +35,12 @@ export const handle = async (event: APIGatewayProxyEvent, _context: Context) => 
             }, null, 2),
             headers: Headers,
         };
-    } catch(err) {
+    } catch(error) {
+        console.log(error);
         return {
             statusCode: 500,
             body: JSON.stringify({
-                error: "Server error!",
+                message: "Server error!",
             }, null, 2),
             headers: Headers,
         };

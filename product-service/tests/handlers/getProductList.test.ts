@@ -29,9 +29,12 @@ describe('getProducById', () => {
       jest
         .spyOn(productService, 'getProducts')
         .mockImplementation(() => Promise.resolve([{
-          uuid: '111',
-          name: 'Product1',
-          price: 100
+          uuid: '9cedbdd7-a4f1-495c-a6b3-1f2e2c086dbe',
+          title: 'Product1',
+          price: 100,
+          count: 10,
+          description: 'Best Product',
+          image: 'images/default.jpg'       
       }]));
 
       const result =  await handle(null, null);

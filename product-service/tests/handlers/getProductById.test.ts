@@ -4,18 +4,18 @@ import { event } from "../mockApiGateway";
 
 describe('getProducById', () => { 
 
-    it('statusResponse 422', async () => {
+    it('statusResponse 400', async () => {
         event.pathParameters = {
           productId: 'yes'
         }
         const result =  await handle(event, null);
-        expect(result.statusCode).toEqual(422);   
+        expect(result.statusCode).toEqual(400);   
     });
 
     it('statusResponse 404', async () => {
 
       event.pathParameters = {
-        productId: '100'
+        productId: '9cedbdd7-a4f1-495c-a6b3-1f2e2c086dbe'
       }
  
       jest
@@ -30,7 +30,7 @@ describe('getProducById', () => {
     it('statusResponse 500', async () => {
 
       event.pathParameters = {
-        productId: '100'
+        productId: '9cedbdd7-a4f1-495c-a6b3-1f2e2c086dbe'
       }
  
       jest
@@ -45,15 +45,18 @@ describe('getProducById', () => {
     it('statusResponse 200', async () => {
 
       event.pathParameters = {
-        productId: '100'
+        productId: '9cedbdd7-a4f1-495c-a6b3-1f2e2c086dbe'
       }
  
       jest
         .spyOn(productService, 'getProduct')
         .mockImplementation(() => Promise.resolve({
-          uuid: '111',
-          name: 'Product1',
-          price: 100
+          uuid: '9cedbdd7-a4f1-495c-a6b3-1f2e2c086dbe',
+          title: 'Product1',
+          price: 100,
+          count: 10,
+          description: 'Best Product', 
+          inages: '/images/default.jpg'     
       }));
 
       const result =  await handle(event, null);
