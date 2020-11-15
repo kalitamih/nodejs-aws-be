@@ -1,15 +1,33 @@
 import { handle } from "../../src/handlers/importProductsFile";
-import * as AWSMock from 'aws-sdk-mock';
+import S3 from "aws-sdk/clients/s3";
+import { event } from "../mockApiGateway";
 
 describe('importProductsFile', () => { 
-   
-    it('statusResponse 200', async () => {  
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
+    
+    it('statusResponse 200 and return test signed url', async () => { 
+        jest.spyOn(S3.prototype, 'getSignedUrlPromise').mockImplementation(() => Promise.resolve('test'));
 
-      await AWSMock.mock('S3', 'getSignedUrlPromise', 'test');
- 
-      const result = await handle(null, null);
-      
-      expect(result.statusCode).toEqual(200);   
-      expect(result.body).toEqual(200);  
+        event.queryStringParameters = { name: "example.csv"};
+
+        const result = await handle(event, null);
+        const body = JSON.parse(result.body);
+        
+        expect(result.statusCode).toEqual(200);   
+        expect(body.signedUrl).toEqual('test');  
+    });
+
+    it('statusResponse 500', async () => { 
+        jest.spyOn(S3.prototype, 'getSignedUrlPromise').mockImplementation(() => Promise.reject('testError'));
+
+        event.queryStringParameters = { name: "example.csv"};
+
+        const result = await handle(event, null);
+        const body = JSON.parse(result.body);
+        
+        expect(result.statusCode).toEqual(500);   
+        expect(body.message).toEqual('Server error!');  
     });
 });
