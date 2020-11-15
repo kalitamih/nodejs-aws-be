@@ -7,6 +7,16 @@ import { Bucket, Headers } from '../utils/constants';
 export const handle = async (event: APIGatewayProxyEvent, _context: Context) => {
 
     try {
+        if (!event.queryStringParameters || !event.queryStringParameters.name) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    message: "validation error",
+                }, null, 2),
+                headers: Headers,
+            };
+        }
+
         const { name } = event.queryStringParameters;
 
         const s3 = new S3({ region: 'eu-west-1' });
