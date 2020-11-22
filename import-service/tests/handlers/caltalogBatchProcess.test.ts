@@ -78,7 +78,7 @@ describe('catalogBatchProcess', () => {
  
         const publishSNSSpy = jest.spyOn(sns.constructor.prototype, 'publish').mockImplementation(() => null);
 
-        sqsEvent.Records[1].body = '{ "count": "a", "price": 299, "description": "Great brogues", "title": "Brogues" }';
+        sqsEvent.Records[1].body = '{ "count": null, "price": 299, "description": "Great brogues", "title": "Brogues" }';
 
         await handle(sqsEvent, null);
       
