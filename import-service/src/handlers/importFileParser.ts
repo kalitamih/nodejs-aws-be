@@ -11,10 +11,8 @@ export const handle = (event: S3Event, _context: Context) => {
     
     event.Records.forEach(record => {      
         const results = [];
-        console.log('1');
         const stream = s3.getObject({ Bucket, Key: record?.s3?.object.key }).createReadStream();
-        console.log('2');
-
+     
         stream.pipe(csv())
             .on('data', (data) => { 
                 console.log(process.env.SQS_URL);

@@ -11,7 +11,13 @@ interface IProductHandler {
     createProduct(products: Product): Promise<void>;
 }
 
+enum PriceFilter {
+    GT300 = "GT300",
+    LTE300 = "LTE300"
+}
+
 export {
     Product,
     IProductHandler,
+    PriceFilter 
 }

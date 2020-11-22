@@ -76,11 +76,23 @@ const serverlessConfiguration: Serverless = {
       },
       SNSSubscription: {
         Type: "AWS::SNS::Subscription",
-        Properties: {
-          Endpoint: "kalita2007@yandex.ru",
-          Protocol: "email",
-          TopicArn: { Ref: "SNSTopic" },
-        }
+        Properties: 
+          {
+            Endpoint: "kalita2007@yandex.ru",
+            Protocol: "email",
+            TopicArn: { Ref: "SNSTopic" },
+            FilterPolicy: { priceFilter: ['GT300'] }
+          }, 
+      },
+      SNSSubscriptionLTE300: {
+        Type: "AWS::SNS::Subscription",
+        Properties: 
+          {
+            Endpoint: "mkalita1991@gmail.com",
+            Protocol: "email",
+            TopicArn: { Ref: "SNSTopic" },
+            FilterPolicy: { priceFilter: ['LTE300'] }
+          }, 
       }
     },
   },
