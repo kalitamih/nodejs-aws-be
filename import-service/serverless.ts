@@ -20,6 +20,13 @@ const serverlessConfiguration: Serverless = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      DB_USER: '${opt:DB_USER}',
+      DB_PASSWORD:'${opt:DB_PASSWORD}',
+      DB_HOST: '${opt:DB_HOST}',
+      DB_PORT: '${opt:DB_PORT}',
+      DB_NAME: '${opt:DB_NAME}',
+      SQS_URL: { Ref: "SQSQueue" },
+      SNS_ARN: { Ref: "SNSTopic" }
     },
     iamRoleStatements: [ 
       {
@@ -36,8 +43,46 @@ const serverlessConfiguration: Serverless = {
         Effect: "Allow",        
         Action: ["s3:*"], 
         Resource: "arn:aws:s3:::kalitamih-task5/parsed/*"
+      },
+      { 
+        Effect: "Allow",
+        Action: "sqs:*",
+        Resource: [
+          {
+             "Fn::GetAtt": [ "SQSQueue", "Arn" ]
+          }
+        ]
+      },
+      {
+        Effect: "Allow",
+        Action: "sns:*",
+        Resource: { Ref: "SNSTopic"}
       }
     ],
+  },
+  resources: {
+    Resources: {
+      SQSQueue: {
+          Type: "AWS::SQS::Queue",
+          Properties: {
+              QueueName: "kalitamih-task-6"
+          }
+      },    
+      SNSTopic: {
+        Type: "AWS::SNS::Topic",
+        Properties: {
+            TopicName: "createProductTopic"
+        }         
+      },
+      SNSSubscription: {
+        Type: "AWS::SNS::Subscription",
+        Properties: {
+          Endpoint: "kalita2007@yandex.ru",
+          Protocol: "email",
+          TopicArn: { Ref: "SNSTopic" },
+        }
+      }
+    },
   },
   functions: {
     importProductsFile: {
@@ -73,6 +118,19 @@ const serverlessConfiguration: Serverless = {
               }
             ],
             existing: true
+          }
+        }
+      ],
+    },
+    catalogBatchProcess: {
+      handler: 'src/handlers/catalogBatchProcess.handle',
+      events: [
+        {
+          sqs: {
+            batchSize: 5,
+            arn: {
+              "Fn::GetAtt": [ "SQSQueue", "Arn" ]
+            }
           }
         }
       ],
