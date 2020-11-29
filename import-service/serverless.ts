@@ -93,7 +93,33 @@ const serverlessConfiguration: Serverless = {
             TopicArn: { Ref: "SNSTopic" },
             FilterPolicy: { priceFilter: ['LTE300'] }
           }, 
-      }
+      },
+      GatewayResponseDefault4XX: {
+        Type: 'AWS::ApiGateway::GatewayResponse',
+        Properties: {
+          ResponseParameters: {          
+            "gatewayresponse.header.Access-Control-Allow-Origin": "'*'", 
+            "gatewayresponse.header.Access-Control-Allow-Headers": "'*'"
+          },
+          ResponseType: "DEFAULT_4XX",
+          RestApiId: {
+            Ref: 'ApiGatewayRestApi'
+          }
+        }
+      },
+      GatewayResponseDefault5XX: {
+        Type: 'AWS::ApiGateway::GatewayResponse',
+        Properties: {
+          ResponseParameters: {          
+            "gatewayresponse.header.Access-Control-Allow-Origin": "'*'", 
+            "gatewayresponse.header.Access-Control-Allow-Headers": "'*'"
+          },
+          ResponseType: "DEFAULT_4XX",
+          RestApiId: {
+            Ref: 'ApiGatewayRestApi'
+          }
+        },
+      },
     },
   },
   functions: {
@@ -111,7 +137,15 @@ const serverlessConfiguration: Serverless = {
                   name: true,         
                 }                
               }        
-            },   
+            }, 
+            authorizer: {
+              name: "tokenAuthorizer",
+              arn:
+                "${cf:authorization-service-${opt:stage}.authorizerLambdaArn}",
+              resultTtlInSeconds: 0,
+              identitySource: "method.request.header.Authorization",
+              type: "token",
+            },  
           }
         }
       ],
@@ -148,6 +182,7 @@ const serverlessConfiguration: Serverless = {
       ],
     }
   }
+  
 }
 
 module.exports = serverlessConfiguration;
