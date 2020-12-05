@@ -14,6 +14,7 @@ export const handle = async(event: SQSEvent, _context: Context) => {
                 continue;
             }
 
+            
             product.price = Math.round(product.price * 100);
             await productHandler.createProduct(product);
             const priceFilter = product.price > 30000 ? PriceFilter.GT300 : PriceFilter.LTE300;

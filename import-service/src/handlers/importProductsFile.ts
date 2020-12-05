@@ -27,6 +27,8 @@ export const handle = async (event: APIGatewayProxyEvent, _context: Context) => 
             Expires: 60,
             ContentType: "text/csv"
         });
+
+        console.log(name);
     
         return {
             statusCode: 200,
