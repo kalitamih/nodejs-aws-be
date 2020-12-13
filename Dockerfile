@@ -2,7 +2,7 @@ FROM mhart/alpine-node as build
 
 WORKDIR /app
 
-COPY ./bff-service/*.json ./
+COPY /bff-service/*.json ./
 
 RUN npm install && npm cache clean --force
 
@@ -15,7 +15,7 @@ FROM mhart/alpine-node
 
 WORKDIR /app
 
-COPY ./bff-service/package.json ./
+COPY /bff-service/package.json ./
 
 RUN npm install --production && npm cache clean --force
 
