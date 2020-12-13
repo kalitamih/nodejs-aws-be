@@ -14,6 +14,10 @@ export const handle: APIGatewayTokenAuthorizerHandler = async (event, _context) 
         }
 
         const [username, password] = Buffer.from(principalId, 'base64').toString('utf-8').split(':');
+
+        console.log(username);
+
+        console.log(password);
        
         const effect = process.env[username] && (process.env[username] === password) ? 'Allow' : 'Deny';
 
